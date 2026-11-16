@@ -26,10 +26,11 @@ project. Both are meant to be public; the row rules are what protect the data.
 
 ## Testing on your own PC
 
-Serve the folder on `127.0.0.1` with `SUPABASE_URL` left empty and the page runs as a test
-copy that keeps figures in the browser only:
+Serve the folder on `127.0.0.1` and open it with `?test` in the address. The page then runs as
+a test copy that keeps figures in the browser only and never touches Supabase:
 
     python -m http.server 8790 --bind 127.0.0.1
+    http://127.0.0.1:8790/?test
 
 ## Moving from the PC version
 

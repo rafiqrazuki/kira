@@ -290,9 +290,10 @@ let S,month=today().slice(0,7),year=+today().slice(0,4),pinned=null;const charts
 function say(t){const m=$('#msg');m.textContent=t;m.hidden=false;clearTimeout(say.t);say.t=setTimeout(()=>m.hidden=true,6000)}
 // ---- storage: everything is one JSON document, kept in this person's row of the Supabase table "kira".
 // The URL and key are public by design; the table's row rules let each signed-in person see only their own row.
-const SUPABASE_URL='',SUPABASE_KEY='';
+const SUPABASE_URL='https://johlegywzbxaylspngyu.supabase.co',SUPABASE_KEY='sb_publishable_te0fmCySGE3hBOxghukd4A_B4yjCeui';
 const ONPC=/^(127\.0\.0\.1|localhost)$/.test(location.hostname);
-const LOCAL=!SUPABASE_URL&&ONPC;   // test copy served from this PC with no project set: data stays in this browser
+// test copy served from this PC with ?test in the address: data stays in this browser, Supabase untouched
+const LOCAL=ONPC&&new URLSearchParams(location.search).has('test');
 let DOC=Kira.emptyDoc(),REV=0,sb=null;
 
 async function fetchDoc(){
@@ -498,7 +499,6 @@ document.addEventListener('visibilitychange',async()=>{if(!document.hidden&&S&&!
 
 async function start(){
   const gate=t=>{$('#login').hidden=false;if(t){$('#fLogin').innerHTML=`<div class="brand">Kira</div><p>${t}</p>`}};
-  if(!SUPABASE_URL&&!ONPC)return gate('Kira is not connected to its database yet.');
   if(!LOCAL){
     if(!window.supabase)return gate('Kira could not load. Check your internet connection, then reload the page.');
     sb=sb||supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
