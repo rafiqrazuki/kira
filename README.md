@@ -1,4 +1,6 @@
-# Kira
+# ($..$)
+
+The app shows itself as ($..$); in code and file names it is still `kira`.
 
 A personal money tracker for Malaysia: net worth, monthly commitments, budget, debt payoff,
 emergency fund, retirement (with EPF), zakat and income tax, all in ringgit.

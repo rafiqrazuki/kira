@@ -1,6 +1,6 @@
 {
-  "name": "Kira",
-  "short_name": "Kira",
+  "name": "($..$)",
+  "short_name": "($..$)",
   "description": "Your money, counted in ringgit",
   "start_url": "./",
   "scope": "./",

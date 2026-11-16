@@ -86,7 +86,7 @@
     const lists = ["accounts", "balances", "txns", "bills"];
     if (!d || d.v !== 1 || lists.some(k => !Array.isArray(d[k]))
       || [d.budgets, d.paid, d.plan].some(o => !o || typeof o !== "object" || Array.isArray(o))) {
-      throw new Error("That file is not a copy of Kira.");
+      throw new Error("That file is not a copy of ($..$).");
     }
     const ids = lists.flatMap(k => d[k].map(x => intId(x.id)));
     return { ...emptyDoc(), ...d, next: Math.max(intId(d.next || 1), ...ids.map(i => i + 1)) };

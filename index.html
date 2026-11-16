@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Kira</title>
-<meta name="theme-color" content="#F1F4F1"><meta name="apple-mobile-web-app-title" content="Kira">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>($..$)</title>
+<meta name="theme-color" content="#F1F4F1"><meta name="apple-mobile-web-app-title" content="($..$)">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Hanken+Grotesk:wght@400..700&display=swap" rel="stylesheet">
@@ -95,7 +95,7 @@ input.sm{width:78px}
 #msg{bottom:76px}
 }
 </style></head><body><div class="app">
-<nav aria-label="Sections"><div class="brand">Kira<span>Your money, counted in ringgit</span></div>
+<nav aria-label="Sections"><div class="brand">($..$)<span>Your money, counted in ringgit</span></div>
 <a href="#overview">Net worth</a><a href="#bills">Commitments</a><a href="#budget">Budget</a><a href="#debts">Debts</a>
 <a href="#fund">Emergency<span class="hm"> fund</span></a><a href="#retire">Retirement</a>
 <a href="#zakat">Zakat<span class="hm"> and tax</span></a><a href="#me">Your data</a></nav>
@@ -263,13 +263,13 @@ input.sm{width:78px}
 <p>Download everything as one file now and then, and keep it somewhere safe. You can load it back here.</p>
 <button class="ghost" id="dl">Download a copy</button>
 <h2>Load from a file</h2>
-<p>Replace everything in Kira with a downloaded copy, or with the file exported from the PC version of Kira.</p>
-<label class="inline">Kira file<input type="file" id="upFile" accept=".json,application/json"></label>
+<p>Replace everything in ($..$) with a downloaded copy, or with the file exported from the PC version.</p>
+<label class="inline">File to load<input type="file" id="upFile" accept=".json,application/json"></label>
 </section>
 
 </main></div><div id="msg" role="alert" hidden></div>
 <div id="login" hidden><form class="box" id="fLogin">
-<div class="brand">Kira<span>Your money, counted in ringgit</span></div>
+<div class="brand">($..$)<span>Your money, counted in ringgit</span></div>
 <label>Email<input name="email" type="email" autocomplete="username" required></label>
 <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
 <button>Sign in</button><p id="loginMsg" role="alert"></p></form></div>
@@ -310,7 +310,7 @@ async function save(next){
   if(error||!data.length){
     await fetchDoc().catch(()=>{});load();
     say(error?'That did not save. Check your internet connection and try again.'
-      :'Kira was changed on another device, so it has reloaded. Make your change again.');
+      :'($..$) was changed on another device, so it has reloaded. Make your change again.');
     throw error||new Error('changed elsewhere')}
   REV=data[0].rev;DOC=next}
 // one save at a time, each built on the one before, so quick taps never look like another device's change
@@ -490,10 +490,10 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
 form('#fAcc','/api/account');form('#fBal','/api/balance');form('#fTx','/api/txn');form('#fBud','/api/budget');form('#fBill','/api/bill');
 
 $('#upFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-  let d;try{d=Kira.fromFile(JSON.parse(await f.text()))}catch{return say('That file is not a copy of Kira.')}
-  if(!confirm(`Replace everything in Kira with this file? It has ${pl(d.accounts.length,'account')}, `
+  let d;try{d=Kira.fromFile(JSON.parse(await f.text()))}catch{return say('That file is not a copy of ($..$).')}
+  if(!confirm(`Replace everything in ($..$) with this file? It has ${pl(d.accounts.length,'account')}, `
     +`${pl(d.bills.length,'commitment')} and ${d.txns.length} budget ${d.txns.length==1?'entry':'entries'}.`))return;
-  await save(d).then(()=>{load();say('Loaded. Everything in Kira now comes from that file.')},()=>{})};
+  await save(d).then(()=>{load();say('Loaded. Everything in ($..$) now comes from that file.')},()=>{})};
 $('#fLogin').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),m=$('#loginMsg');m.textContent='';
   const{error}=await sb.auth.signInWithPassword({email:f.get('email').trim(),password:f.get('password')});
   if(error)return m.textContent=/invalid/i.test(error.message)?'That email and password do not match. Try again.':error.message;
@@ -509,16 +509,16 @@ async function live(session){
     async p=>{if(p.new?.rev===REV)return;await fetchDoc().catch(()=>{});load()}).subscribe()}   // same rev = this device's own save
 
 async function start(){
-  const gate=t=>{$('#login').hidden=false;if(t){$('#fLogin').innerHTML=`<div class="brand">Kira</div><p>${t}</p>`}};
+  const gate=t=>{$('#login').hidden=false;if(t){$('#fLogin').innerHTML=`<div class="brand">($..$)</div><p>${t}</p>`}};
   let session=null;
   if(!LOCAL){
-    if(!window.supabase)return gate('Kira could not load. Check your internet connection, then reload the page.');
+    if(!window.supabase)return gate('($..$) could not load. Check your internet connection, then reload the page.');
     sb=sb||supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     session=(await sb.auth.getSession()).data.session;
     if(!session)return gate();
     $('#meWho').textContent=`Signed in as ${session.user.email}. Your figures are kept in your own Supabase project, so every device you sign in on sees the same numbers, as soon as they change.`}
   else{$('#meWho').textContent='Test copy on this PC: figures stay in this browser only.';$('#signOut').hidden=true}
-  try{await fetchDoc()}catch{return gate('Kira could not load your data. Check your internet connection, then reload the page.')}
+  try{await fetchDoc()}catch{return gate('($..$) could not load your data. Check your internet connection, then reload the page.')}
   if(session)live(session).catch(()=>{});   // without live updates Kira still works; it refreshes when you come back to it
   $('#login').hidden=true;await load();
   const og=(l,a)=>`<optgroup label="${l}">${opts(a)}</optgroup>`;
