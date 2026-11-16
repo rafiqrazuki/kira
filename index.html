@@ -300,6 +300,7 @@ async function fetchDoc(){
   if(LOCAL){let s=null;try{s=localStorage.getItem('kira-test')}catch{}DOC=s?Kira.fromFile(JSON.parse(s)):Kira.emptyDoc();return}
   const{data,error}=await sb.from('kira').select('data,rev').maybeSingle();
   if(error)throw error;
+  if(data&&data.rev<REV)return;   // a slow answer older than what this device already has
   DOC=data?Kira.fromFile(data.data):Kira.emptyDoc();REV=data?data.rev:0}
 // rev guards against two devices saving over each other: an update only lands on the version it started from
 async function save(next){
@@ -312,10 +313,13 @@ async function save(next){
       :'Kira was changed on another device, so it has reloaded. Make your change again.');
     throw error||new Error('changed elsewhere')}
   REV=data[0].rev;DOC=next}
-async function api(method,url,body){
-  const next=structuredClone(DOC);
-  try{Kira.apply(next,method,url,body)}catch(e){say(e.message||'That did not save. Check the numbers and try again.');throw e}
-  await save(next);return{ok:true}}
+// one save at a time, each built on the one before, so quick taps never look like another device's change
+let queue=Promise.resolve();
+function api(method,url,body){
+  const run=async()=>{const next=structuredClone(DOC);
+    try{Kira.apply(next,method,url,body)}catch(e){say(e.message||'That did not save. Check the numbers and try again.');throw e}
+    await save(next);return{ok:true}};
+  return queue=queue.then(run,run)}
 async function load(){S=Kira.state(DOC,month,null,year);render()}
 
 function line(sel,labels,sets,prefix=''){
@@ -494,19 +498,28 @@ $('#fLogin').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target
   const{error}=await sb.auth.signInWithPassword({email:f.get('email').trim(),password:f.get('password')});
   if(error)return m.textContent=/invalid/i.test(error.message)?'That email and password do not match. Try again.':error.message;
   e.target.reset();start()};
-// a change made on the phone shows up on the PC when you come back to it
+// backstop for live sync: coming back to Kira always fetches the latest, in case the connection dropped
 document.addEventListener('visibilitychange',async()=>{if(!document.hidden&&S&&!LOCAL){await fetchDoc().catch(()=>{});load()}});
+
+// live sync: Supabase tells every open device when this person's row changes, and each one reloads it
+async function live(session){
+  await sb.realtime.setAuth(session.access_token);   // row rules apply to live updates too, so they need the sign-in
+  sb.auth.onAuthStateChange((_,s)=>{if(s)sb.realtime.setAuth(s.access_token)});
+  sb.channel('kira-live').on('postgres_changes',{event:'*',schema:'public',table:'kira',filter:'owner=eq.'+session.user.id},
+    async p=>{if(p.new?.rev===REV)return;await fetchDoc().catch(()=>{});load()}).subscribe()}   // same rev = this device's own save
 
 async function start(){
   const gate=t=>{$('#login').hidden=false;if(t){$('#fLogin').innerHTML=`<div class="brand">Kira</div><p>${t}</p>`}};
+  let session=null;
   if(!LOCAL){
     if(!window.supabase)return gate('Kira could not load. Check your internet connection, then reload the page.');
     sb=sb||supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    const{data:{session}}=await sb.auth.getSession();
+    session=(await sb.auth.getSession()).data.session;
     if(!session)return gate();
-    $('#meWho').textContent=`Signed in as ${session.user.email}. Your figures are kept in your own Supabase project, so every device you sign in on sees the same numbers.`}
+    $('#meWho').textContent=`Signed in as ${session.user.email}. Your figures are kept in your own Supabase project, so every device you sign in on sees the same numbers, as soon as they change.`}
   else{$('#meWho').textContent='Test copy on this PC: figures stay in this browser only.';$('#signOut').hidden=true}
   try{await fetchDoc()}catch{return gate('Kira could not load your data. Check your internet connection, then reload the page.')}
+  if(session)live(session).catch(()=>{});   // without live updates Kira still works; it refreshes when you come back to it
   $('#login').hidden=true;await load();
   const og=(l,a)=>`<optgroup label="${l}">${opts(a)}</optgroup>`;
   $('#fAcc [name=type]').innerHTML=og('I own',S.asset_types)+og('I owe',S.debt_types);

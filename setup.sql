@@ -19,3 +19,6 @@ create policy "add own row" on public.kira
   for insert to authenticated with check (owner = (select auth.uid()));
 create policy "change own row" on public.kira
   for update to authenticated using (owner = (select auth.uid())) with check (owner = (select auth.uid()));
+
+-- Live sync: every open device hears when its owner's row changes (row rules still apply).
+alter publication supabase_realtime add table public.kira;

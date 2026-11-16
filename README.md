@@ -21,6 +21,10 @@ One table, `public.kira`: one row per person (`owner` = their user id), the whol
 from, so if two devices change Kira at the same time, the second one reloads instead of
 overwriting. Row-level security limits every person to their own row.
 
+Live sync: the table is in the `supabase_realtime` publication, so every open device hears when
+its owner's row changes and reloads it. Coming back to the page also reloads, in case the live
+connection dropped.
+
 `SUPABASE_URL` and `SUPABASE_KEY` near the top of the script in `index.html` point at the
 project. Both are meant to be public; the row rules are what protect the data.
 
