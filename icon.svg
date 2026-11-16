@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Kira's note strip: assets laid side by side like ringgit notes, with engraving lines.
+       Kept inside the middle 80% so phones can crop it to a circle. -->
+  <defs>
+    <pattern id="engrave" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+      <rect width="2.4" height="10" fill="#fff" opacity=".2"/>
+    </pattern>
+    <clipPath id="note"><rect x="96" y="176" width="320" height="160" rx="18"/></clipPath>
+  </defs>
+  <rect width="512" height="512" fill="#0F2A32"/>
+  <g clip-path="url(#note)">
+    <rect x="96" y="176" width="128" height="160" fill="#0B7A75"/>
+    <rect x="230" y="176" width="84" height="160" fill="#2F6DB5"/>
+    <rect x="320" y="176" width="54" height="160" fill="#B8862B"/>
+    <rect x="380" y="176" width="36" height="160" fill="#BF2F4A"/>
+    <rect x="96" y="176" width="320" height="160" fill="url(#engrave)"/>
+  </g>
+</svg>

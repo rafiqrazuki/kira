@@ -1,0 +1,4 @@
+# Never commit money data: exports and downloaded copies stay on your own devices.
+*.json
+!manifest.webmanifest
+node_modules/
